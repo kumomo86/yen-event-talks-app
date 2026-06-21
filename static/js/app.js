@@ -12,6 +12,7 @@ const errorState = document.getElementById('error-state');
 const errorMessage = document.getElementById('error-message');
 const emptyState = document.getElementById('empty-state');
 const refreshBtn = document.getElementById('refresh-btn');
+const exportCsvBtn = document.getElementById('export-csv-btn');
 const btnSpinner = document.getElementById('btn-spinner');
 const retryBtn = document.getElementById('retry-btn');
 const syncStatus = document.getElementById('sync-status');
@@ -48,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Setup Event Listeners
 function setupEventListeners() {
     refreshBtn.addEventListener('click', () => fetchReleaseNotes(true));
+    exportCsvBtn.addEventListener('click', exportToCSV);
     retryBtn.addEventListener('click', () => fetchReleaseNotes(true));
     
     // Search inputs
@@ -198,6 +200,9 @@ function renderFeed() {
                     <div class="badges-wrapper">${badgesHtml}</div>
                 </div>
                 <div class="card-actions">
+                    <button class="card-action-btn btn-copy" title="Copy to clipboard">
+                        <i class="fa-solid fa-copy"></i>
+                    </button>
                     <button class="card-action-btn btn-tweet" title="Tweet this update">
                         <i class="fa-brands fa-x-twitter"></i>
                     </button>
@@ -210,6 +215,25 @@ function renderFeed() {
                 ${note.content}
             </div>
         `;
+        
+        // Attach event listener to Copy button
+        card.querySelector('.btn-copy').addEventListener('click', (e) => {
+            const rawContent = stripHtml(note.content).trim();
+            const categoriesStr = note.categories.join(', ');
+            const textToCopy = `Google Cloud BigQuery Update (${note.title})\nCategories: ${categoriesStr}\nLink: ${note.link}\n\n${rawContent}`;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const icon = e.currentTarget.querySelector('i');
+                icon.className = 'fa-solid fa-check';
+                icon.style.color = 'var(--color-feature)';
+                setTimeout(() => {
+                    icon.className = 'fa-solid fa-copy';
+                    icon.style.color = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        });
         
         // Attach event listener to Tweet button
         card.querySelector('.btn-tweet').addEventListener('click', () => openTweetModal(note));
@@ -371,4 +395,39 @@ function handleTweetRedirect(e) {
     
     const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetTextarea.value)}`;
     modalTweetBtn.setAttribute('href', tweetUrl);
+}
+
+// Export current filtered notes to CSV
+function exportToCSV() {
+    if (filteredNotes.length === 0) {
+        alert('No notes available to export.');
+        return;
+    }
+    
+    // CSV headers
+    const headers = ['Date/Title', 'Link', 'Categories', 'Content'];
+    
+    // Map rows
+    const rows = filteredNotes.map(note => {
+        const title = note.title.replace(/"/g, '""');
+        const link = note.link.replace(/"/g, '""');
+        const categories = note.categories.join(', ').replace(/"/g, '""');
+        const content = stripHtml(note.content).replace(/\s+/g, ' ').trim().replace(/"/g, '""');
+        
+        return `"${title}","${link}","${categories}","${content}"`;
+    });
+    
+    // Join header and rows
+    const csvContent = [headers.join(','), ...rows].join('\n');
+    
+    // Create download link
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `bigquery_release_notes_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
