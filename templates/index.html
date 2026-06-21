@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Notes Hub</title>
+    <meta name="description" content="A modern, high-performance dashboard to track, search, filter, and share Google Cloud BigQuery release updates.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Background glow elements -->
+    <div class="glow-bg-orb orb-1"></div>
+    <div class="glow-bg-orb orb-2"></div>
+    <div class="glow-bg-orb orb-3"></div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-database logo-icon"></i>
+                    <div class="logo-dots">
+                        <span class="dot d1"></span>
+                        <span class="dot d2"></span>
+                    </div>
+                </div>
+                <div class="brand-name">
+                    <h1>BigQuery</h1>
+                    <span>Release Hub</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h2 class="section-title">Overview</h2>
+                <div class="stats-grid">
+                    <div class="stat-card" id="stat-total-updates">
+                        <span class="stat-num">—</span>
+                        <span class="stat-lbl">Total Entries</span>
+                    </div>
+                    <div class="stat-card" id="stat-latest-date">
+                        <span class="stat-num" style="font-size: 0.95rem; font-weight: 600;">—</span>
+                        <span class="stat-lbl">Latest Release</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h2 class="section-title">Filter by Category</h2>
+                <div class="category-filters" id="category-filter-list">
+                    <button class="filter-btn active" data-category="all">
+                        <span class="color-dot all"></span> All Updates
+                    </button>
+                    <button class="filter-btn" data-category="feature">
+                        <span class="color-dot feature"></span> Features
+                    </button>
+                    <button class="filter-btn" data-category="deprecation">
+                        <span class="color-dot deprecation"></span> Deprecations
+                    </button>
+                    <button class="filter-btn" data-category="changed">
+                        <span class="color-dot changed"></span> Changes
+                    </button>
+                    <button class="filter-btn" data-category="resolved">
+                        <span class="color-dot resolved"></span> Resolved Issues
+                    </button>
+                    <button class="filter-btn" data-category="beta">
+                        <span class="color-dot beta"></span> Beta Releases
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-section instructions">
+                <h2 class="section-title">Sharing Guide</h2>
+                <p>Click on the <i class="fa-brands fa-x-twitter"></i> <strong>Tweet</strong> button on any release entry to format and share the update directly to your network.</p>
+            </div>
+            
+            <div class="sidebar-footer">
+                <p>© 2026 BigQuery Release Hub</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h2>Recent Releases</h2>
+                    <p class="subtitle" id="sync-status">Connected to BigQuery Atom Feed</p>
+                </div>
+                
+                <div class="header-right">
+                    <div class="search-box-container">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="search-input" placeholder="Search release notes (e.g. storage, json)...">
+                        <button id="search-clear-btn" class="search-clear-btn" style="display: none;">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    
+                    <button id="refresh-btn" class="btn btn-primary" title="Refresh release notes">
+                        <i class="fa-solid fa-arrows-rotate refresh-spinner" id="btn-spinner"></i>
+                        <span>Sync Notes</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Loading overlay inside content -->
+            <div id="loading-state" class="loading-state">
+                <div class="spinner-container">
+                    <div class="double-bounce1"></div>
+                    <div class="double-bounce2"></div>
+                </div>
+                <p>Retrieving BigQuery release notes...</p>
+            </div>
+
+            <!-- Error state -->
+            <div id="error-state" class="error-state" style="display: none;">
+                <i class="fa-solid fa-triangle-exclamation error-icon"></i>
+                <h3>Sync Failure</h3>
+                <p id="error-message">Unable to fetch release notes from Google Cloud feed.</p>
+                <button id="retry-btn" class="btn btn-secondary">
+                    <i class="fa-solid fa-rotate"></i> Retry Connection
+                </button>
+            </div>
+
+            <!-- Feed content -->
+            <div id="feed-container" class="feed-container" style="display: none;">
+                <!-- Dynamically populated card feed -->
+            </div>
+            
+            <!-- Empty state -->
+            <div id="empty-state" class="empty-state" style="display: none;">
+                <i class="fa-regular fa-folder-open empty-icon"></i>
+                <h3>No Updates Found</h3>
+                <p>Try clearing your filters or refining your search keywords.</p>
+                <button id="clear-filters-btn" class="btn btn-outline">Clear Filters</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Twitter Composer Modal -->
+    <div class="modal-overlay" id="tweet-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fa-brands fa-x-twitter"></i>
+                    <h3>Compose Tweet</h3>
+                </div>
+                <button class="modal-close" id="modal-close-btn">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="source-preview">
+                    <span class="preview-label">Selected Update:</span>
+                    <h4 id="modal-source-title">—</h4>
+                    <p id="modal-source-summary">—</p>
+                </div>
+                
+                <div class="tweet-composer">
+                    <textarea id="tweet-textarea" rows="5" placeholder="What's happening?"></textarea>
+                    <div class="tweet-composer-footer">
+                        <div class="tweet-tools">
+                            <button class="tool-btn" id="btn-add-hashtags" title="Add Hashtags">
+                                <i class="fa-solid fa-hashtag"></i>
+                            </button>
+                            <button class="tool-btn" id="btn-add-link" title="Include Release Link">
+                                <i class="fa-solid fa-link"></i>
+                            </button>
+                            <button class="tool-btn" id="btn-copy-tweet" title="Copy Tweet">
+                                <i class="fa-solid fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="char-count-container">
+                            <span id="char-count">0</span>/280
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="modal-cancel-btn">Cancel</button>
+                <a href="#" target="_blank" class="btn btn-primary" id="modal-tweet-btn">
+                    <i class="fa-brands fa-x-twitter"></i> Share Update
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Script -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
