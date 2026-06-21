@@ -47,6 +47,28 @@ body {
     position: relative;
 }
 
+/* Smooth transitions for theme switching */
+body, 
+.sidebar, 
+.release-card, 
+.btn, 
+.card-action-btn, 
+#search-input, 
+.stat-card, 
+.instructions, 
+.filter-btn, 
+.brand-name span, 
+.brand-name h1,
+.brand-name,
+header h2,
+header p {
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Background Glowing Orbs */
 .glow-bg-orb {
     position: absolute;
