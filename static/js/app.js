@@ -21,6 +21,8 @@ const syncStatus = document.getElementById('sync-status');
 const searchInput = document.getElementById('search-input');
 const searchClearBtn = document.getElementById('search-clear-btn');
 const clearFiltersBtn = document.getElementById('clear-filters-btn');
+const staleBanner = document.getElementById('stale-banner');
+const staleBannerText = document.getElementById('stale-banner-text');
 
 // Stats Elements
 const statTotalUpdates = document.getElementById('stat-total-updates');
@@ -108,6 +110,14 @@ async function fetchReleaseNotes(forceRefresh = false) {
                     categories: parseCategories(item.content)
                 };
             });
+            
+            // Show stale offline warning banner if cache was returned due to offline error
+            if (result.is_stale) {
+                staleBannerText.textContent = `Offline Mode: Showing cached data from ${result.cached_at}. Upstream sync failed.`;
+                staleBanner.style.display = 'flex';
+            } else {
+                staleBanner.style.display = 'none';
+            }
             
             // Update UI/Stats
             updateStats(releaseNotes);
@@ -282,6 +292,11 @@ function showState(state) {
     errorState.style.display = state === 'error' ? 'flex' : 'none';
     emptyState.style.display = state === 'empty' ? 'flex' : 'none';
     feedContainer.style.display = state === 'feed' ? 'flex' : 'none';
+    
+    // Hide offline banner if we are loading or in error state
+    if (state !== 'feed') {
+        staleBanner.style.display = 'none';
+    }
 }
 
 // Strip HTML tags for clean summaries/searches
