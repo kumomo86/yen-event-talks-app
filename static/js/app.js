@@ -13,6 +13,8 @@ const errorMessage = document.getElementById('error-message');
 const emptyState = document.getElementById('empty-state');
 const refreshBtn = document.getElementById('refresh-btn');
 const exportCsvBtn = document.getElementById('export-csv-btn');
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const themeIcon = document.getElementById('theme-icon');
 const btnSpinner = document.getElementById('btn-spinner');
 const retryBtn = document.getElementById('retry-btn');
 const syncStatus = document.getElementById('sync-status');
@@ -42,6 +44,7 @@ const btnCopyTweet = document.getElementById('btn-copy-tweet');
 
 // Initialize App
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     fetchReleaseNotes();
     setupEventListeners();
 });
@@ -50,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupEventListeners() {
     refreshBtn.addEventListener('click', () => fetchReleaseNotes(true));
     exportCsvBtn.addEventListener('click', exportToCSV);
+    themeToggleBtn.addEventListener('click', toggleTheme);
     retryBtn.addEventListener('click', () => fetchReleaseNotes(true));
     
     // Search inputs
@@ -430,4 +434,36 @@ function exportToCSV() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+// Theme Toggle Logic
+function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-theme');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    updateThemeIcon(isLight);
+}
+
+function updateThemeIcon(isLight) {
+    if (isLight) {
+        themeIcon.className = 'fa-solid fa-moon';
+        themeToggleBtn.setAttribute('title', 'Switch to Dark Mode');
+    } else {
+        themeIcon.className = 'fa-solid fa-sun';
+        themeToggleBtn.setAttribute('title', 'Switch to Light Mode');
+    }
+}
+
+// Initialize Theme
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+    
+    const useLight = savedTheme === 'light' || (!savedTheme && systemPrefersLight);
+    
+    if (useLight) {
+        document.body.classList.add('light-theme');
+    } else {
+        document.body.classList.remove('light-theme');
+    }
+    updateThemeIcon(useLight);
 }

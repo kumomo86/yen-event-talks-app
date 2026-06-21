@@ -917,3 +917,66 @@ body {
         justify-content: center;
     }
 }
+
+/* Light Theme Variables & Overrides */
+body.light-theme {
+    --bg-primary: #f3f4f6;
+    --bg-secondary: #ffffff;
+    --bg-glass: rgba(255, 255, 255, 0.8);
+    --border-glass: rgba(0, 0, 0, 0.08);
+    --border-glass-hover: rgba(0, 0, 0, 0.15);
+    
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #9ca3af;
+    
+    --shadow-premium: 0 8px 32px 0 rgba(31, 41, 55, 0.08);
+}
+
+body.light-theme .sidebar {
+    background-color: #ffffff;
+}
+
+body.light-theme .color-dot.all {
+    background-color: var(--text-primary);
+}
+
+body.light-theme .stats-grid .stat-card {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+body.light-theme .instructions {
+    background: rgba(0, 0, 0, 0.01);
+}
+
+body.light-theme #search-input {
+    background-color: rgba(0, 0, 0, 0.03);
+    color: var(--text-primary);
+}
+
+body.light-theme #search-input:focus {
+    background-color: #ffffff;
+}
+
+body.light-theme .card-action-btn {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--text-secondary);
+}
+
+body.light-theme .card-action-btn:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--text-primary);
+}
+
+body.light-theme ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+body.light-theme ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+body.light-theme .filter-btn:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
